@@ -3,6 +3,9 @@ package com.somika.imagefileservice.controller;
 import com.somika.imagefileservice.dto.ImageDto;
 import com.somika.imagefileservice.service.impl.ImageServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,5 +38,17 @@ public class ImageController {
     @GetMapping("/search")
     public List<ImageDto> searchImagesByColor(@RequestParam String color) {
         return imageService.searchImagesByColor(color);
+    }
+
+    @GetMapping("/{imageId}/download")
+    public ResponseEntity<byte[]> downloadImage(@PathVariable Long imageId) {
+        byte[] imageData = imageService.getImageDataById(imageId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(imageData);
     }
 }

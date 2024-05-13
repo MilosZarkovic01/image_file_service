@@ -118,33 +118,37 @@ const ImageGallery = () => {
     }
   };
 
-  const handleDownloadImage = async (imageUrl, imageName) => {
+  const handleDownloadImage = async (imageId, imageName) => {
     try {
-      console.log(imageUrl);
-      const response = await fetch(imageUrl);
-      console.log('ovde');
-
+      const response = await fetch(`http://localhost:8080/images/${imageId}/download`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      });
+  
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-
+  
       const link = document.createElement('a');
       link.href = url;
       link.download = imageName;
       document.body.appendChild(link);
       link.click();
-
+  
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading image:', error);
     }
   };
+  
 
   const handleSearchHexValue = (hexValue) => {
     const encodedHexValue = encodeURIComponent(hexValue);
     const searchUrl = `https://www.google.com/search?q=${encodedHexValue}`;
     window.open(searchUrl, '_blank');
   };
-  
+
 
   return (
     <Flex direction="column" alignItems="center" bg="gray.50" minH="100vh" width="1000px">
@@ -184,7 +188,7 @@ const ImageGallery = () => {
                 <Button colorScheme="red" size="sm" onClick={() => handleDeleteImage(image.id)} ml="10">
                   <FaTrash />
                 </Button>
-                <Button colorScheme="blue" size="sm" onClick={() => handleDownloadImage(image.imageUrl, image.title)} mr="2">
+                <Button colorScheme="blue" size="sm" onClick={() => handleDownloadImage(image.id, image.title)} mr="2">
                   <FaDownload />
                 </Button>
                 <Button colorScheme="purple" size="sm" onClick={() => handleSearchHexValue(image.hexValue)}>

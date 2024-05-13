@@ -15,4 +15,7 @@ public interface ImageService {
     void deleteImage(Long id);
 
     List<ImageDto> searchImagesByColor(String color);
+
+    byte[] getImageDataById(Long imageId);
+
 }

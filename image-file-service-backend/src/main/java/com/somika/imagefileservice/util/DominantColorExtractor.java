@@ -1,4 +1,4 @@
-package com.somika.imagefileservice.service;
+package com.somika.imagefileservice.util;
 
 import org.springframework.stereotype.Service;
 

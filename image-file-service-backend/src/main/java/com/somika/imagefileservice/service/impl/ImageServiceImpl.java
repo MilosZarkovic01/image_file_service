@@ -1,18 +1,17 @@
 package com.somika.imagefileservice.service.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import com.somika.imagefileservice.config.AwsS3Config;
 import com.somika.imagefileservice.domain.Image;
 import com.somika.imagefileservice.dto.ImageDto;
 import com.somika.imagefileservice.mapper.ImageMapper;
 import com.somika.imagefileservice.repository.ImageRepository;
-import com.somika.imagefileservice.service.DominantColorExtractor;
+import com.somika.imagefileservice.util.DominantColorExtractor;
 import com.somika.imagefileservice.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -83,6 +82,21 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public List<ImageDto> searchImagesByColor(String color) {
         return imageMapper.imagesToImageDTOs(imageRepository.findByDominantColorIgnoreCase(color));
+    }
+
+    @Override
+    public byte[] getImageDataById(Long imageId) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new RuntimeException("Image not found"));
+
+        S3Object s3Object = amazonS3.getObject(awsS3Config.getS3().getBucketName(), image.getAwsKey());
+
+        try (S3ObjectInputStream stream = s3Object.getObjectContent()) {
+            return StreamUtils.copyToByteArray(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error while reading image data.");
+        }
     }
 
     private String getImageUrl(String key) {
